@@ -151,8 +151,8 @@ SERVER_PORT=8080
 ```json
 POST /api/auth/register
 {
-  "name": "Marco",
-  "email": "marco@example.com",
+  "name": "Marcos",
+  "email": "marcos@example.com",
   "password": "secret123"
 }
 ```
@@ -162,7 +162,7 @@ POST /api/auth/register
 ```json
 POST /api/auth/login
 {
-  "email": "marco@example.com",
+  "email": "marcos@example.com",
   "password": "secret123"
 }
 ```
