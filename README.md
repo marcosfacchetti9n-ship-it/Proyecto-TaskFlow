@@ -82,7 +82,9 @@ Variables recomendadas en Render:
 - `SHOW_SQL=false`
 - `APP_CORS_ALLOWED_ORIGINS=https://tu-frontend.netlify.app`
 
-Comando de arranque:
+Si usas Docker en Render, este repo ya incluye [Dockerfile](C:/Users/Marco/OneDrive/Desktop/Codex_test/Dockerfile).
+
+Comando de arranque sin Docker:
 
 ```text
 mvn spring-boot:run
