@@ -2,6 +2,7 @@ package com.example.taskmanager.config;
 
 import com.example.taskmanager.security.JwtAuthenticationFilter;
 import com.example.taskmanager.security.JwtAuthenticationEntryPoint;
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,8 +35,8 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final UserDetailsService userDetailsService;
 
-    @Value("${application.cors.allowed-origins:http://localhost:8080,http://127.0.0.1:8080}")
-    private List<String> allowedOrigins;
+    @Value("${application.cors.allowed-origins:http://localhost:8080,http://127.0.0.1:8080,http://localhost:5500,http://127.0.0.1:5500}")
+    private String allowedOrigins;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -48,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/index.html",
+                                "/tasks.html",
                                 "/styles.css",
                                 "/app.js",
                                 "/config.js"
@@ -83,7 +85,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(allowedOrigins);
+        configuration.setAllowedOriginPatterns(resolveAllowedOriginPatterns());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -91,5 +93,27 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    private List<String> resolveAllowedOriginPatterns() {
+        List<String> configuredOrigins = Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(origin -> !origin.isEmpty())
+                .toList();
+
+        if (configuredOrigins.isEmpty()) {
+            return List.of("http://localhost:*", "http://127.0.0.1:*");
+        }
+
+        return Arrays.asList(
+                configuredOrigins.toArray(new String[0])
+        ).stream().distinct().collect(java.util.stream.Collectors.collectingAndThen(
+                java.util.stream.Collectors.toList(),
+                origins -> {
+                    origins.add("http://localhost:*");
+                    origins.add("http://127.0.0.1:*");
+                    return origins.stream().distinct().toList();
+                }
+        ));
     }
 }

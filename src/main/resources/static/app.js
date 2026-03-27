@@ -1,5 +1,7 @@
 const API_BASE = window.APP_CONFIG?.API_BASE || "/api";
 const STORAGE_KEY = "task_manager_session";
+const AUTH_PAGE = "index.html";
+const TASKS_PAGE = "tasks.html";
 
 const state = {
     session: loadSession(),
@@ -41,30 +43,17 @@ const elements = {
     taskFeedLabel: document.getElementById("taskFeedLabel")
 };
 
+const page = detectPage();
+
 initialize();
 
 function initialize() {
-    elements.registerForm.addEventListener("submit", handleRegister);
-    elements.loginForm.addEventListener("submit", handleLogin);
-    elements.taskForm.addEventListener("submit", handleTaskSubmit);
-    elements.logoutButton.addEventListener("click", logout);
-    elements.cancelEditButton.addEventListener("click", resetTaskEditor);
-    elements.refreshTasksButton.addEventListener("click", fetchTasks);
-    elements.searchInput.addEventListener("input", handleFilterChange);
-    elements.statusFilter.addEventListener("change", handleFilterChange);
-    elements.overdueFilter.addEventListener("change", handleFilterChange);
-    elements.sortFilter.addEventListener("change", handleFilterChange);
-
-    updateSessionUI();
-    updateMetrics([]);
-    resetTaskEditor();
-    syncFilterControls();
-
-    if (state.session?.token) {
-        fetchTasks();
-    } else {
-        renderTasks();
+    if (page === "auth") {
+        initializeAuthPage();
+        return;
     }
+
+    initializeTasksPage();
 }
 
 async function handleRegister(event) {
@@ -79,7 +68,7 @@ async function handleRegister(event) {
         persistSession(response);
         elements.registerForm.reset();
         showToast("Cuenta creada y sesion iniciada.", "success");
-        await fetchTasks();
+        redirectToTasks();
     } catch (error) {
         showToast(error.message, "error");
     }
@@ -97,7 +86,7 @@ async function handleLogin(event) {
         persistSession(response);
         elements.loginForm.reset();
         showToast("Sesion iniciada correctamente.", "success");
-        await fetchTasks();
+        redirectToTasks();
     } catch (error) {
         showToast(error.message, "error");
     }
@@ -337,25 +326,38 @@ function logout(showMessage = true) {
     state.tasks = [];
     state.editingTaskId = null;
     localStorage.removeItem(STORAGE_KEY);
-    resetTaskEditor();
+    if (page === "tasks") {
+        resetTaskEditor();
+        updateMetrics([]);
+        renderTasks();
+    }
     updateSessionUI();
-    updateMetrics([]);
-    renderTasks();
     if (showMessage) {
         showToast("Sesion cerrada.", "success");
     }
+    redirectToAuth();
 }
 
 function updateSessionUI() {
     const hasSession = Boolean(state.session?.token);
-    elements.sessionStatus.textContent = hasSession ? "Sesion activa" : "Sin sesion iniciada";
-    elements.sessionUser.textContent = hasSession
-            ? `${state.session.name} - ${state.session.email}`
-            : "No hay usuario autenticado.";
-    elements.logoutButton.style.display = hasSession ? "inline-flex" : "none";
+    if (elements.sessionStatus) {
+        elements.sessionStatus.textContent = hasSession ? "Sesion activa" : "Sin sesion iniciada";
+    }
+    if (elements.sessionUser) {
+        elements.sessionUser.textContent = hasSession
+                ? `${state.session.name} - ${state.session.email}`
+                : "No hay usuario autenticado.";
+    }
+    if (elements.logoutButton) {
+        elements.logoutButton.style.display = hasSession ? "inline-flex" : "none";
+    }
 }
 
 function updateMetrics(tasks) {
+    if (!elements.totalTasks) {
+        return;
+    }
+
     const pending = tasks.filter((task) => task.status === "PENDING").length;
     const progress = tasks.filter((task) => task.status === "IN_PROGRESS").length;
     const completed = tasks.filter((task) => task.status === "COMPLETED").length;
@@ -371,6 +373,10 @@ function updateMetrics(tasks) {
 }
 
 function syncFilterControls() {
+    if (!elements.searchInput) {
+        return;
+    }
+
     elements.searchInput.value = state.filters.query;
     elements.statusFilter.value = state.filters.status;
     elements.overdueFilter.checked = state.filters.overdueOnly;
@@ -494,4 +500,53 @@ function escapeHtml(value) {
             .replaceAll(">", "&gt;")
             .replaceAll('"', "&quot;")
             .replaceAll("'", "&#039;");
+}
+
+function initializeAuthPage() {
+    if (state.session?.token) {
+        redirectToTasks();
+        return;
+    }
+
+    elements.registerForm?.addEventListener("submit", handleRegister);
+    elements.loginForm?.addEventListener("submit", handleLogin);
+    updateSessionUI();
+}
+
+function initializeTasksPage() {
+    if (!state.session?.token) {
+        redirectToAuth();
+        return;
+    }
+
+    elements.taskForm?.addEventListener("submit", handleTaskSubmit);
+    elements.logoutButton?.addEventListener("click", logout);
+    elements.cancelEditButton?.addEventListener("click", resetTaskEditor);
+    elements.refreshTasksButton?.addEventListener("click", fetchTasks);
+    elements.searchInput?.addEventListener("input", handleFilterChange);
+    elements.statusFilter?.addEventListener("change", handleFilterChange);
+    elements.overdueFilter?.addEventListener("change", handleFilterChange);
+    elements.sortFilter?.addEventListener("change", handleFilterChange);
+
+    updateSessionUI();
+    updateMetrics([]);
+    resetTaskEditor();
+    syncFilterControls();
+    fetchTasks();
+}
+
+function detectPage() {
+    const pathname = window.location.pathname.toLowerCase();
+    if (pathname.endsWith(`/${TASKS_PAGE}`) || pathname.endsWith(TASKS_PAGE)) {
+        return "tasks";
+    }
+    return "auth";
+}
+
+function redirectToTasks() {
+    window.location.href = TASKS_PAGE;
+}
+
+function redirectToAuth() {
+    window.location.href = AUTH_PAGE;
 }
