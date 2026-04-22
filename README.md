@@ -1,22 +1,37 @@
-# Task Manager
+# TaskFlow
 
-Full stack task management application built with Java, Spring Boot, PostgreSQL, JWT authentication and a custom frontend served by the backend.
+Hi, I am Marcos Facchetti, and this repository showcases one of the portfolio projects I built to strengthen my backend and full stack development skills.
 
-This project was designed as a portfolio-ready application that demonstrates backend development, authentication, database persistence, layered architecture and deployment to cloud services.
+TaskFlow is a full stack task management application built with Java, Spring Boot, Spring Security, JWT, PostgreSQL, HTML, CSS and JavaScript. I created it as a practical project to work on authentication, CRUD operations, layered architecture, frontend-backend integration and cloud deployment.
 
-## What This Project Does
+## What I Built
 
-- User registration and login
+With this project, I implemented:
+
+- user registration and login
 - JWT-based authentication
-- Task creation, listing, update and deletion
-- Per-user task isolation
-- Validation and global error handling
-- Responsive frontend connected to the real API
-- Cloud-ready configuration for Neon and Render
+- task creation, listing, update and deletion
+- per-user task isolation
+- validation and global error handling
+- a responsive frontend connected to a real API
+- deployment-ready configuration for Render and Neon
+
+## Why I Built It
+
+I wanted to move beyond tutorial-style exercises and build something that looked and behaved like a real application.
+
+This project helped me practice:
+
+- backend development with Spring Boot
+- secure authentication flows
+- relational database integration
+- clean code organization by layers
+- API consumption from a custom frontend
+- deployment in a cloud environment
 
 ## Tech Stack
 
-- Java 17
+- Java 17+
 - Spring Boot
 - Spring Security
 - JWT
@@ -29,17 +44,18 @@ This project was designed as a portfolio-ready application that demonstrates bac
 - Render
 - Neon
 
-## Architecture
+## Project Structure
 
-The backend follows a clean layered structure:
+I organized the backend using a layered structure to keep responsibilities separated and the code easier to maintain:
 
 - `controller`: HTTP endpoints
 - `service`: business logic
-- `repository`: database access
+- `repository`: data access
 - `domain`: entities and enums
 - `dto`: request and response models
 - `security`: JWT and Spring Security configuration
 - `exception`: validation and error handling
+- `config`: application and security setup
 
 ## Main Features
 
@@ -58,10 +74,12 @@ The backend follows a clean layered structure:
 
 ## Security Notes
 
-- Passwords are stored encrypted with BCrypt
-- JWT is required to access task endpoints
-- Each authenticated user can only access their own tasks
-- CORS is configurable through environment variables for deployment
+To make the project closer to a real-world backend, I included:
+
+- BCrypt password hashing
+- JWT protection for task endpoints
+- user-based task ownership
+- configurable CORS for local and deployed environments
 
 ## Frontend
 
@@ -69,15 +87,25 @@ The frontend is built with vanilla HTML, CSS and JavaScript and is served direct
 
 It includes:
 
-- registration and login forms
+- access page with registration and login
+- separate task management dashboard
 - JWT session persistence with `localStorage`
 - task editor
-- task board
-- filters and sorting
-- visual status indicators
+- task board with filters and sorting
 - responsive layout
 
-## Local Run
+## What This Project Demonstrates
+
+I use this project to show practical experience with:
+
+- secure API development
+- CRUD application design
+- frontend and backend integration
+- PostgreSQL persistence
+- code organization with clear layers
+- deployment preparation and environment configuration
+
+## Running It Locally
 
 ### Requirements
 
@@ -118,19 +146,13 @@ http://localhost:8080
 
 ## Deployment
 
-### Database
+This project is prepared to run with:
 
 - PostgreSQL hosted on Neon
+- application deployment on Render
+- Docker using the included [Dockerfile](./Dockerfile)
 
-### Application
-
-- Deploy-ready for Render
-- Includes a multi-stage [Dockerfile](./Dockerfile)
-- Includes [.dockerignore](./.dockerignore)
-
-### Render Environment Variables
-
-Example production variables:
+### Example Production Variables
 
 ```text
 DB_URL=jdbc:postgresql://your-host/your-db?sslmode=require&channel_binding=require
@@ -180,15 +202,6 @@ Authorization: Bearer <token>
 }
 ```
 
-## Why This Project Matters
+## Final Note
 
-This project demonstrates practical experience with:
-
-- secure API development
-- relational database integration
-- full CRUD implementation
-- frontend and backend integration
-- cloud deployment preparation
-- code organization for maintainability
-
-It is intended to represent junior-level backend and full stack development skills through a complete, testable application.
+If you are reviewing this repository as a recruiter or hiring manager, this project represents how I approach learning through real implementation: I prefer building complete, deployable applications that let me practice backend logic, security, database integration and frontend interaction in a practical way.
